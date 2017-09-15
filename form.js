@@ -1,45 +1,44 @@
-document.getElementById('fetch').addEventListener('click', function () {
-	runRoutine();
-});
-
 document.getElementById('username').addEventListener('keypress', function(e) {
 	var key = e.which || e.keyCode;
     if (key === 13) { 
-		runRoutine();
+		runRoutine("username");
     }
 });
 
 document.getElementById('userid').addEventListener('keypress', function(e) {
 	var key = e.which || e.keyCode;
     if (key === 13) { 
-		runRoutine();
+		runRoutine("userid");
     }
 });
 
-function runRoutine() {
+function runRoutine(from) {
     var usernameTB = document.getElementById('username');
 	var useridTB = document.getElementById('userid');
 	clearError();
-	if(usernameTB.value.length > 0 && useridTB.value.length > 0) 
-		setError("One of the textboxes must be empty.<br><b>Fetch User ID</b>: Place username in the username box, leave user id box empty.<br><b>Fetch Username</b>: Place user id in the user id box, leave username box empty.");
-	else if(usernameTB.value.length > 0)
-		request(usernameTB, useridTB, 3, fetchUserId, failedRequest);
-	else
-		request(useridTB, usernameTB, 5, fetchUsername, failedRequest);
+	if(from == "username") {
+		getUserId(fetchUserId, failedRequest);
+	} else if(from == "userid") {
+		getUsername(fetchUsername, failedRequest);
+	}
 }
 
 function fetchUserId(targetTB, json, username) {
-	if("error" in json)
-		badRequest("username", username)
-	else
-		targetTB.value = json['_id'];
+	if("error" in json) {
+		badRequest("username", username);
+	} else {
+		targetTB.value = json['data'][0]['id'];
+		setSuccess("User ID retrieved successfully.");
+	}
 }
 
 function fetchUsername(targetTB, json, userid) {
-	if("error" in json)
-		badRequest("user id", userid)
-	else
-		targetTB.value = json['name'];
+	if("error" in json) {
+		badRequest("user id", userid);
+	} else {
+		targetTB.value = json['data'][0]['login'];
+		setSuccess("Username retrieved successfully.");
+	}
 }
 
 function failedRequest() {
@@ -50,19 +49,65 @@ function badRequest(type, resource) {
 	setError("The " + type + " '" + resource + "' was not valid!");
 }
 
-function request(tb, targetTB, apiVersion, callbackSuccess, callbackFailure) {
+function getUserId(fetchUserId, failedRequest) {
+	var input = document.getElementById('username');
+	var output = document.getElementById('userid');
+	
+	output.value = "";
+	
 	var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
-        if (req.readyState == 4 && (req.status == 200 || req.status == 404 || req.status == 400 || req.status == 422))
-            callbackSuccess(targetTB, JSON.parse(req.responseText), tb.value);
-		else if(req.readyState == 4)
-			callbackFailure();
+        if (req.readyState == 4 && req.status == 200) {
+			var json = JSON.parse(req.responseText);
+			if(json['data'].length > 0) {
+				fetchUserId(output, json, input.value);
+			} else {
+				badRequest("username", input.value);
+			}
+		} else if(req.readyState == 4) {
+			failedRequest();
+		}
     }
 	
-    req.open("GET", "https://api.twitch.tv/kraken/users/" + tb.value, true);
-	req.setRequestHeader("Accept", "application/vnd.twitchtv.v" + apiVersion + "+json");
+    req.open("GET", "https://api.twitch.tv/helix/users?login=" + input.value, true);
+	req.setRequestHeader("Accept", "application/json");
 	req.setRequestHeader("Client-ID", "abe7gtyxbr7wfcdftwyi9i5kej3jnq");
     req.send(null);
+}
+
+function getUsername(fetchUsername, failedRequest) {
+	var input = document.getElementById('userid');
+	var output = document.getElementById('username');
+	
+	output.value = "";
+	
+	var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+        if (req.readyState == 4 && req.status == 200) {
+			var json = JSON.parse(req.responseText);
+			if(json['data'].length > 0) {
+				fetchUsername(output, json, input.value);
+			} else {
+				badRequest("user id", input.value);
+			}
+		} else if(req.readyState == 4) {
+			failedRequest();
+		}
+    }
+	
+    req.open("GET", "https://api.twitch.tv/helix/users?id=" + input.value, true);
+	req.setRequestHeader("Accept", "application/json");
+	req.setRequestHeader("Client-ID", "abe7gtyxbr7wfcdftwyi9i5kej3jnq");
+    req.send(null);
+}
+
+function setSuccess(successMsg) {
+	document.getElementById("success").innerHTML = successMsg;
+	setTimeout(clearSuccess, 10000);
+}
+
+function clearSuccess() {
+	document.getElementById("success").innerHTML = "";
 }
 
 function setError(errorMsg) {

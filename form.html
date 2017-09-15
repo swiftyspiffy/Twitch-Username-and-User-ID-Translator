@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <title>Twitch Username and User ID Translator</title>
 <img src="twitch.png" style="text-align: center; width: 150px;"></img><br><br>
-<input type="text" id="username" name="username" style="text-align: center; width: 150px" placeholder="username" /><br>
-<input type="text" id="userid" name="userid" style="text-align: center; width: 150px" placeholder="user id" /><br><br>
-<button id="fetch" name="fetch" style="text-align: center; width: 100%">Fetch</button><br>
-<span id="error" id="error" name="error" style="text-align: center; color: red;"></span>
+<input type="text" id="username" name="username" style="text-align: center; width: 150px" placeholder="username" autocomplete=off /><br>
+<input type="text" class="glowing-border" id="userid" name="userid" style="text-align: center; width: 150px" placeholder="user id" autocomplete=off /><br>
+<span id="error" name="error" style="text-align: center; color: red;"></span>
+<span id="success" name="success" style="text-align: center; color: green;"></span>
 <script src="form.js"></script>
