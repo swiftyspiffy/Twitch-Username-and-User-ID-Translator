@@ -5,11 +5,14 @@
     <input type="text" id="q" name="q" style="text-align: center; width: 150px" placeholder="username or user id" autocomplete=off /><br>
     <div style="text-align: center;">
         <small>
-            Detected: <span id="detected"></span> <a href="#" id="switch" style="color: gray; text-decoration: none;">&#8644;</a><br/>
+            Detected: <span id="detected"></span> <a href="#" title="click to manually switch between username and user id" id="switch">&#8644;</a><br/>
         </small>
-        <b id="response"></b><br/>
+		<div id="result" style="display: none;">
+			<b id="response"></b> <a id="copy" href="#">copy</a><br/>
+		</div>
         <small id="error" style="color: red;"></small>
         <small id="success" style="color: green;"></small>
+		<small id="copied" style="color: blue;"></small>
     </div>
 </div>
 <script src="form.js"></script>
