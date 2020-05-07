@@ -69,20 +69,20 @@ function runRoutine(input, type) {
 }
 
 function fetchUserId(json, username) {
-    if ("error" in json) {
-        badRequest("username", username);
-    } else {
-        queryOutput.innerText = json['data'][0]['id'];
+	if (json['users'].length == 0) {
+		badRequest("username", username);
+	} else {
+		queryOutput.innerText = json['users'][0]['_id'];
         setSuccess("User ID retrieved successfully.");
 		resultDiv.style.display = "";
-    }
+	}
 }
 
 function fetchUsername(json, userid) {
     if ("error" in json) {
         badRequest("user id", userid);
     } else {
-        queryOutput.innerHTML = json['data'][0]['login'];
+        queryOutput.innerHTML = json['name'];
         setSuccess("Username retrieved successfully.");
 		resultDiv.style.display = "";
     }
@@ -105,7 +105,7 @@ function getUserId(fetchUserId, failedRequest) {
     req.onreadystatechange = function () {
         if (req.readyState === 4 && req.status === 200) {
             let json = JSON.parse(req.responseText);
-            if (json['data'].length > 0) {
+            if (json['users'].length > 0) {
                 fetchUserId(json, queryInput.value);
             } else {
                 badRequest("username", queryInput.value);
@@ -115,8 +115,8 @@ function getUserId(fetchUserId, failedRequest) {
         }
     };
 
-    req.open("GET", "https://api.twitch.tv/helix/users?login=" + queryInput.value, true);
-    req.setRequestHeader("Accept", "application/json");
+    req.open("GET", "https://api.twitch.tv/kraken/users?login=" + queryInput.value, true);
+    req.setRequestHeader("Accept", "application/vnd.twitchtv.v5+json");
     req.setRequestHeader("Client-ID", CLIENT_ID);
     req.send(null);
 }
@@ -128,18 +128,16 @@ function getUsername(fetchUsername, failedRequest) {
     req.onreadystatechange = function () {
         if (req.readyState === 4 && req.status === 200) {
             let json = JSON.parse(req.responseText);
-            if (json['data'].length > 0) {
-                fetchUsername(json, queryInput.value);
-            } else {
-                badRequest("user id", queryInput.value);
-            }
+			fetchUsername(json, queryInput.value);
+			
+            //badRequest("user id", queryInput.value);
         } else if (req.readyState === 4) {
             failedRequest();
         }
     };
 
-    req.open("GET", "https://api.twitch.tv/helix/users?id=" + queryInput.value, true);
-    req.setRequestHeader("Accept", "application/json");
+    req.open("GET", "https://api.twitch.tv/kraken/users/" + queryInput.value, true);
+    req.setRequestHeader("Accept", "application/vnd.twitchtv.v5+json");
     req.setRequestHeader("Client-ID", CLIENT_ID);
     req.send(null);
 }
