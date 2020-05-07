@@ -10,7 +10,7 @@
       "150": "icon.png"
    },
    "manifest_version": 2,
-   "name": "Twitch Username and User ID Translator1",
+   "name": "Twitch Username and User ID Translator",
    "options_ui": {
       "chrome_style": true,
       "page": "form.html"
@@ -18,5 +18,5 @@
    "permissions": [  ],
    "short_name": "TwitchUsr2ID",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.6"
+   "version": "1.7"
 }
