@@ -1,18 +1,61 @@
 <!DOCTYPE html>
 <title>Twitch Username and User ID Translator</title>
 <div style="color: gray; font-family: Arial, serif;">
-    <img src="twitch.png" style="text-align: center; width: 150px;"/><br><br>
-    <input type="text" id="q" name="q" style="text-align: center; width: 150px" placeholder="username or user id" autocomplete=off /><br>
-    <div style="text-align: center;">
-        <small>
-            Detected: <span id="detected"></span> <a href="#" title="click to manually switch between username and user id" id="switch">&#8644;</a><br/>
-        </small>
-		<div id="result" style="display: none;">
-			<b id="response"></b> <a id="copy" href="#">copy</a><br/>
-		</div>
-        <small id="error" style="color: red;"></small>
-        <small id="success" style="color: green;"></small>
-		<small id="copied" style="color: blue;"></small>
+    <img src="twitch.png" style="text-align: center; width: 150px;"/><br>
+    <div style="text-align: center; font-size: 70%; padding-bottom: 5px;">
+        <a id="ui_toggle_link" href="#">settings</a>
+    </div>
+    <div id="main_ui">
+        <input type="text" id="q" name="q" style="text-align: center; width: 150px" placeholder="username or user id" autocomplete=off /><br>
+        <div style="text-align: center;">
+            <small>
+                Detected: <span id="detected"></span> <a href="#" title="click to manually switch between username and user id" id="switch">&#8644;</a><br/>
+            </small>
+            <div id="result" style="display: none;">
+                <b id="response"></b> <a id="copy" href="#">copy</a><br/>
+            </div>
+            <small id="error" style="color: red;"></small>
+            <small id="success" style="color: green;"></small>
+            <small id="copied" style="color: blue;"></small>
+        </div>
+    </div>
+    <div id="settings_ui" style="display: none;">
+        <table>
+            <tr>
+                <table width="100%">
+                    <tr>
+                        <td colspan=2 style="font-size: 120%">Execution Mode</td>
+                    </tr>
+                    <tr width="100%" style="font-size: 30%;">
+                        <td colspan=1>
+                            Built-in <a href="#" id="description_user">[User]</a><br>
+                            <input type="radio" id="user" name="execution_mode" value="user" checked>
+                        </td>
+                        <td colspan=1>
+                            Custom <a href="#" id="description_app">[App]</a><br>
+                            <input type="radio" id="app" name="execution_mode" value="app"> 
+                        </td>
+                    </tr>
+                    <tr class="custom_settings" style="display: none;">
+                        <td colspan=2 style="font-size: 120%">Custom App Settings</td>
+                    </tr>
+                    <tr class="custom_settings" style="display: none;">
+                        <td colspan=2 style="font-size: 30%;">
+                            ClientId<br>
+                            <input type="text" id="app_clientid" name="app_clientid"></input>
+                        </td>
+                    </tr>
+                    <tr class="custom_settings" style="display: none;">
+                        <td colspan=2 style="font-size: 30%">
+                            Client Secret<br>
+                            <input type="text" id="app_clientsecret" name="app_clientsecret"></input>
+                        </td>
+                    </tr>
+                </table>
+            </tr>
+        </table>
     </div>
 </div>
-<script src="form.js"></script>
+<script src="main.js"></script>
+<script src="settings.js"></script>
+<script src="execute.js"></script>
