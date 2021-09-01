@@ -9,14 +9,17 @@ var storage = chrome.storage.local;
 function getUserIdV2(username, callbackSuccess, callbackFailure) {
     getCredentials(
         function(credentials) {
+			dbg("getUserIdV2", "credentials acquired, getting users");
             helixGetUsers(
                 credentials, 
                 function(userid) {
                     // GetUsers success, update UI
+					dbg("getUserIdV2", "userid acquired, calling back to UI");
                     callbackSuccess(userid);
                 },
                 function(message) {
                     // GetUsers failed, update UI
+					dbg("getUserIdV2", "userid failed, calling back to UI");
                     callbackFailure(message);
                 },
                 username
@@ -24,6 +27,7 @@ function getUserIdV2(username, callbackSuccess, callbackFailure) {
         },
         function(message) {
             // getting credentials failed, update UI
+			dbg("getUserIdV2", "credentials failed, calling back to UI");
             callbackFailure(message);
         }
     );
@@ -33,14 +37,17 @@ function getUserIdV2(username, callbackSuccess, callbackFailure) {
 function getUsernameV2(userid, callbackSuccess, callbackFailure) {
     getCredentials(
         function(credentials) {
+			dbg("getUsernameV2", "credentials acquired, getting users");
             helixGetUsers(
                 credentials, 
                 function(username) {
                     // GetUsers success, update UI
+					dbg("getUsernameV2", "username acquired, calling back to UI");
                     callbackSuccess(username);
                 },
                 function(message) {
                     // GetUsers failed, update UI
+					dbg("getUsernameV2", "username failed, calling back to UI");
                     callbackFailure(message);
                 },
                 undefined,
@@ -49,12 +56,13 @@ function getUsernameV2(userid, callbackSuccess, callbackFailure) {
         },
         function(message) {
             // getting credentials failed, update UI
+			dbg("getUsernameV2", "credentials failed, calling back to UI");
             callbackFailure(message);
         }
     );
 }
 
-function helixGetUsers(credentials, callbackSuccess, callbackFailure, username = undefined, userid = undefined) {
+function helixGetUsers(credentials, callbackSuccess, callbackFailure, username = undefined, userid = undefined, isRetry = false) {
     var getUsersUrl = 'https://api.twitch.tv/helix/users';
     if(username == undefined) {
         getUsersUrl += '?id=' + userid;
@@ -71,19 +79,35 @@ function helixGetUsers(credentials, callbackSuccess, callbackFailure, username =
                 if(username == undefined) {
                     // return the username
                     dbg("helixGetUsers", "get username success: " + json);
+					cacheCredentials(credentials);
                     callbackSuccess(json['data'][0]['login']);
                 } else {
                     // return the userid
                     dbg("helixGetUsers", "get user id success: " + json);
+					cacheCredentials(credentials);
                     callbackSuccess(json['data'][0]['id']);
                 }
             } else {
                 dbg("helixGetUsers", "user not found");
+				cacheCredentials(credentials);
                 callbackFailure("user not found")
             }
         } else if (req.readyState === 4) {
             dbg("helixGetUsers", "get users request failed: " + req.responseText);
-            callbackFailure("get users request failed")
+			if(isRetry) {
+				// do not retry request
+				callbackFailure("get users request failed");
+			} else {
+				// retry request with forced new credentials
+				getCredentials(
+					function(newCredentials) {
+						helixGetUsers(newCredentials, callbackSuccess, callbackFailure, username, userid, true);
+					},
+					function() {
+						callbackFailure("get users request failed [retry]");
+					}, true);
+			}
+            
         }
     };
 
@@ -93,7 +117,32 @@ function helixGetUsers(credentials, callbackSuccess, callbackFailure, username =
     req.send(null);
 }
 
-function getCredentials(callbackSuccess, callbackFailure) {
+function cacheCredentials(credentials) {
+	storage.set({'client_id': credentials['client_id']});
+	storage.set({'access_token': credentials['token']});
+}
+
+function getCredentials(callbackSuccess, callbackFailure, forceReauth = false) {
+	if(!forceReauth) {
+		dbg("getCredentials", "checking for cached credentials");
+		storage.get(["client_id", "access_token"], function(results) {
+			if(results !== undefined && results.access_token !== undefined && results.client_id !== undefined) {
+				dbg("getCredentials", "cached credentials discovered!");
+				if(debug) {
+					console.log(results);
+				}
+				callbackSuccess({client_id: results.client_id, token: results.access_token});
+				return;
+			} else {
+				dbg("getCredentials", "one or more cached values were undefined, forcing refresh");
+			}
+		});
+		return;
+	} else {
+		dbg("getCredentials", "forcing reauth");
+	}
+	dbg("getCredentials", "cache check completed");
+	
     storage.get('mode', function (result) {
         var mode = "user";
         if(result != undefined && result.mode != undefined) {
@@ -102,7 +151,7 @@ function getCredentials(callbackSuccess, callbackFailure) {
         dbg("getCredentials", "mode: " + mode);
         switch(mode) {
             case "app":
-                getCredentailsFromCustomApp(
+                getCredentialsFromCustomApp(
                     function(credentials) {
                         // credentials call successful, return array(client_id, token)
                         dbg("getCredentials", "app success: " + credentials);
@@ -154,11 +203,13 @@ function getCredentialsFromUser(callbackSuccess, callbackFailure) {
         }
     };
 
+	var url = "https://twitchtokengenerator.com/api/refresh/" + hardcodedRefreshToken;
+	dbg("getCredentialsFromUser", "url: " + url);
     req.open("GET", "https://twitchtokengenerator.com/api/refresh/" + hardcodedRefreshToken, true);
     req.send(null);
 }
 
-function getCredentailsFromCustomApp(callbackSuccess, callbackFailure) {
+function getCredentialsFromCustomApp(callbackSuccess, callbackFailure) {
     getCustomAppStorage(
         function(customapp_storage) {
             var clientId = customapp_storage['client_id'];
