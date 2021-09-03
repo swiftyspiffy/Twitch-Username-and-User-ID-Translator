@@ -135,14 +135,16 @@ function getCredentials(callbackSuccess, callbackFailure, forceReauth = false) {
 				return;
 			} else {
 				dbg("getCredentials", "one or more cached values were undefined, forcing refresh");
+				getFreshCredentials(function(credentials) { callbackSuccess(credentials); }, function(message) { callbackFailure(message); });
 			}
 		});
-		return;
 	} else {
 		dbg("getCredentials", "forcing reauth");
+		getFreshCredentials(function(credentials) { callbackSuccess(credentials); }, function(message) { callbackFailure(message); });
 	}
-	dbg("getCredentials", "cache check completed");
-	
+}
+
+function getFreshCredentials(callbackSuccess, callbackFailure) {
     storage.get('mode', function (result) {
         var mode = "user";
         if(result != undefined && result.mode != undefined) {
@@ -180,7 +182,7 @@ function getCredentials(callbackSuccess, callbackFailure, forceReauth = false) {
                 );
                 break;
         }
-    });
+    });	
 }
 
 function getCredentialsFromUser(callbackSuccess, callbackFailure) {
