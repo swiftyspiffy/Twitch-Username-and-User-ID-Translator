@@ -1,5 +1,5 @@
 {
-   "browser_action": {
+   "action": {
       "default_icon": {
          "150": "icon.png"
       },
@@ -11,10 +11,7 @@
    },
    "manifest_version": 3,
    "name": "Twitch Username and User ID Translator",
-   "options_ui": {
-      "chrome_style": true,
-      "page": "form.html"
-   },
+   "options_page": "form.html",
    "permissions": [ "storage" ],
    "host_permissions": [],
    "short_name": "TwitchUsr2ID",
