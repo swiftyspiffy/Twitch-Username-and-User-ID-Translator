@@ -1,0 +1,367 @@
+:root {
+    color-scheme: light;
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+    font-synthesis: none;
+    --twitch: #9147ff;
+    --twitch-hover: #772ce8;
+    --ink: #18181b;
+    --muted: #62626a;
+    --surface: #ffffff;
+    --surface-subtle: #f7f7f8;
+    --border: #dedee3;
+    --success: #16844b;
+    --success-bg: #e8f8ef;
+    --danger: #c8323e;
+    --danger-bg: #fff0f1;
+    --focus-ring: rgba(145, 71, 255, 0.22);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+body {
+    width: 340px;
+    margin: 0;
+    color: var(--ink);
+    background: var(--surface-subtle);
+    font-size: 14px;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+}
+
+.popup {
+    min-height: 100%;
+    padding: 22px;
+    background: var(--surface);
+    border-top: 4px solid var(--twitch);
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.twitch-logo {
+    width: 96px;
+    height: auto;
+    display: block;
+}
+
+.app-header h1 {
+    margin: 0 0 3px;
+    font-size: 17px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.app-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.lookup-form {
+    display: grid;
+    gap: 10px;
+}
+
+.field-label {
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.query-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 42px 0 13px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition:
+        border-color 120ms ease,
+        box-shadow 120ms ease;
+}
+
+.query-input::placeholder {
+    color: #898991;
+}
+
+.query-input:hover {
+    border-color: #b8b8c0;
+}
+
+.query-input:focus {
+    border-color: var(--twitch);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.clear-button {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: grid;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    place-items: center;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.clear-button:hover {
+    color: var(--ink);
+    background: var(--surface-subtle);
+}
+
+.clear-button svg {
+    width: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.8;
+}
+
+.input-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 28px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.type-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.detected-type {
+    color: var(--twitch-hover);
+    font-weight: 650;
+}
+
+.type-toggle {
+    display: grid;
+    width: 27px;
+    height: 27px;
+    padding: 0;
+    place-items: center;
+    color: var(--twitch-hover);
+    background: #f2ebff;
+    border: 1px solid #ddccfb;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.type-toggle:hover {
+    background: #e8dcff;
+}
+
+.type-toggle svg {
+    width: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+
+.submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 42px;
+    margin-top: 2px;
+    color: #ffffff;
+    background: var(--twitch);
+    border: 0;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 120ms ease,
+        transform 80ms ease;
+}
+
+.submit-button:hover:not(:disabled) {
+    background: var(--twitch-hover);
+}
+
+.submit-button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.submit-button:disabled {
+    cursor: wait;
+    opacity: 0.72;
+}
+
+.submit-spinner {
+    width: 17px;
+    height: 17px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 700ms linear infinite;
+}
+
+.result-card {
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.result-heading,
+.result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.result-heading {
+    margin-bottom: 9px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.result-badge {
+    padding: 3px 7px;
+    color: var(--success);
+    background: var(--success-bg);
+    border-radius: 999px;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+}
+
+.result-value {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 17px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.copy-button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 5px;
+    min-width: 68px;
+    height: 32px;
+    padding: 0 10px;
+    color: var(--twitch-hover);
+    background: var(--surface);
+    border: 1px solid #d2c0ef;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background: #f2ebff;
+}
+
+.copy-button.copied {
+    color: var(--success);
+    border-color: #9ed7b7;
+}
+
+.copy-button svg {
+    width: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+
+.status {
+    margin: 14px 0 0;
+    padding: 9px 10px;
+    color: var(--muted);
+    background: var(--surface-subtle);
+    border-radius: 7px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.status.error {
+    color: var(--danger);
+    background: var(--danger-bg);
+}
+
+.status.success {
+    color: var(--success);
+    background: var(--success-bg);
+}
+
+footer {
+    margin-top: 18px;
+    color: #919198;
+    font-size: 10px;
+    text-align: center;
+}
+
+button:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

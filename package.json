@@ -1,0 +1,32 @@
+{
+    "name": "twitch-username-userid-translator",
+    "version": "2.2.0",
+    "type": "module",
+    "description": "Chrome/Firefox extension to translate between Twitch usernames and user IDs",
+    "private": true,
+    "scripts": {
+        "lint": "eslint . --ext .js",
+        "lint:fix": "eslint . --ext .js --fix",
+        "test": "node --test",
+        "check": "npm run lint && npm test && npm run format:check",
+        "format": "prettier --write \"**/*.{js,json,md,css,html}\"",
+        "format:check": "prettier --check \"**/*.{js,json,md,css,html}\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/swiftyspiffy/Twitch-Username-and-User-ID-Translator.git"
+    },
+    "keywords": [
+        "twitch",
+        "chrome-extension",
+        "firefox-addon",
+        "username",
+        "userid"
+    ],
+    "author": "Cole (swiftyspiffy)",
+    "license": "MIT",
+    "devDependencies": {
+        "eslint": "^8.57.0",
+        "prettier": "^3.2.5"
+    }
+}

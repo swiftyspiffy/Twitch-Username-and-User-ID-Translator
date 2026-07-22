@@ -1,61 +1,100 @@
-<!DOCTYPE html>
-<title>Twitch Username and User ID Translator</title>
-<div style="color: gray; font-family: Arial, serif;">
-    <img src="twitch.png" style="text-align: center; width: 170px;"/><br>
-    <div style="text-align: center; font-size: 70%; padding-bottom: 5px;">
-        <a id="ui_toggle_link" href="#">settings</a>
-    </div>
-    <div id="main_ui">
-        <input type="text" id="q" name="q" style="text-align: center; width: 170px" placeholder="username or user id" autocomplete=off /><br>
-        <div style="text-align: center;">
-            <small>
-                Detected: <span id="detected"></span> <a href="#" title="click to manually switch between username and user id" id="switch">&#8644;</a><br/>
-            </small>
-            <div id="result" style="display: none;">
-                <b id="response"></b> <a id="copy" href="#">copy</a><br/>
-            </div>
-            <small id="error" style="color: red;"></small>
-            <small id="success" style="color: green;"></small>
-            <small id="copied" style="color: blue;"></small>
-        </div>
-    </div>
-    <div id="settings_ui" style="display: none;">
-        <table>
-            <tr>
-                <table width="100%">
-                    <tr>
-                        <td colspan=2 style="font-size: 120%">Execution Mode</td>
-                    </tr>
-                    <tr width="100%" style="font-size: 90%;">
-                        <td colspan=1>
-                            Built-in <a href="#" id="description_user">[User]</a><br>
-                            <input type="radio" id="user" name="execution_mode" value="user" checked>
-                        </td>
-                        <td colspan=1>
-                            Custom <a href="#" id="description_app">[App]</a><br>
-                            <input type="radio" id="app" name="execution_mode" value="app"> 
-                        </td>
-                    </tr>
-                    <tr class="custom_settings" style="display: none;">
-                        <td colspan=2 style="font-size: 120%">Custom App Settings</td>
-                    </tr>
-                    <tr class="custom_settings" style="display: none;">
-                        <td colspan=2 style="font-size: 90%;">
-                            ClientId<br>
-                            <input type="text" id="app_clientid" name="app_clientid" style="text-align: center; width: 170px"></input>
-                        </td>
-                    </tr>
-                    <tr class="custom_settings" style="display: none;">
-                        <td colspan=2 style="font-size: 90%">
-                            Client Secret<br>
-                            <input type="text" id="app_clientsecret" name="app_clientsecret" style="text-align: center; width: 170px"></input>
-                        </td>
-                    </tr>
-                </table>
-            </tr>
-        </table>
-    </div>
-</div>
-<script src="main.js"></script>
-<script src="settings.js"></script>
-<script src="execute.js"></script>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Twitch Username ↔ User ID</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <main class="popup">
+            <header class="app-header">
+                <img class="twitch-logo" src="twitch.png" alt="Twitch" />
+                <div>
+                    <h1>Username <span aria-hidden="true">↔</span> User ID</h1>
+                    <p>Convert in either direction</p>
+                </div>
+            </header>
+
+            <form id="lookup-form" class="lookup-form" novalidate>
+                <label class="field-label" for="query">Twitch account</label>
+                <div class="input-wrapper">
+                    <input
+                        id="query"
+                        class="query-input"
+                        name="query"
+                        type="text"
+                        placeholder="Username or user ID"
+                        autocomplete="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        aria-describedby="input-help status"
+                    />
+                    <button
+                        id="clear-button"
+                        class="clear-button"
+                        type="button"
+                        aria-label="Clear input"
+                        title="Clear"
+                        hidden
+                    >
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="m6 6 8 8m0-8-8 8" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="input-help" class="input-meta">
+                    <span>Detected input</span>
+                    <span class="type-control">
+                        <span id="detected-type" class="detected-type">Username</span>
+                        <button
+                            id="type-toggle"
+                            class="type-toggle"
+                            type="button"
+                            title="Swap between username and user ID"
+                        >
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="M4 7h11m0 0-3-3m3 3-3 3M16 13H5m0 0 3 3m-3-3 3-3" />
+                            </svg>
+                        </button>
+                    </span>
+                </div>
+
+                <button id="submit-button" class="submit-button" type="submit">
+                    <span class="submit-label">Translate</span>
+                    <span class="submit-spinner" aria-hidden="true" hidden></span>
+                </button>
+            </form>
+
+            <section
+                id="result"
+                class="result-card"
+                aria-labelledby="result-label"
+                aria-live="polite"
+                hidden
+            >
+                <div class="result-heading">
+                    <span id="result-label">User ID</span>
+                    <span class="result-badge">Found</span>
+                </div>
+                <div class="result-row">
+                    <output id="response" class="result-value" for="query"></output>
+                    <button id="copy-button" class="copy-button" type="button">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <rect x="7" y="7" width="9" height="9" rx="2" />
+                            <path d="M13 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1" />
+                        </svg>
+                        <span id="copy-label">Copy</span>
+                    </button>
+                </div>
+            </section>
+
+            <p id="status" class="status" role="status" aria-live="polite" hidden></p>
+
+            <footer>Press Enter to translate</footer>
+        </main>
+
+        <script type="module" src="main.js"></script>
+    </body>
+</html>

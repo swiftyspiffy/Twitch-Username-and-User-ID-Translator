@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Configuration
+config.js
+
+# Extension package
+*.crx
+*.pem
+*.zip

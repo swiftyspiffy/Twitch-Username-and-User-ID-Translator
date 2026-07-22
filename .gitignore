@@ -1,0 +1,22 @@
+# Local production configuration
+config.js
+
+# Development dependencies
+node_modules/
+
+# Packaged extension output
+*.crx
+*.pem
+*.zip
+
+# Generated build output
+dist/
+build/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

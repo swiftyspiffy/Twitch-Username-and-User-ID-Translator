@@ -1,136 +1,189 @@
-const CLIENT_ID = 'abe7gtyxbr7wfcdftwyi9i5kej3jnq';
+import { convertTwitchIdentifier } from './execute.js';
+import {
+    INPUT_TYPE,
+    detectInputType,
+    getInputTypeLabel,
+    getOutputTypeLabel,
+    normalizeInput,
+    validateInput
+} from './input.js';
 
-const TYPE_USERNAME = 'Username';
-const TYPE_USER_ID = 'User id';
+const elements = {
+    form: document.querySelector('#lookup-form'),
+    input: document.querySelector('#query'),
+    clearButton: document.querySelector('#clear-button'),
+    typeToggle: document.querySelector('#type-toggle'),
+    detectedType: document.querySelector('#detected-type'),
+    submitButton: document.querySelector('#submit-button'),
+    submitLabel: document.querySelector('.submit-label'),
+    submitSpinner: document.querySelector('.submit-spinner'),
+    result: document.querySelector('#result'),
+    resultLabel: document.querySelector('#result-label'),
+    response: document.querySelector('#response'),
+    copyButton: document.querySelector('#copy-button'),
+    copyLabel: document.querySelector('#copy-label'),
+    status: document.querySelector('#status')
+};
 
-let detected = TYPE_USERNAME;
+const state = {
+    inputType: INPUT_TYPE.USERNAME,
+    requestId: 0,
+    copyResetTimer: null
+};
 
-let resultDiv = document.getElementById("result");
-let queryInput = document.getElementById('q');
-let queryOutput = document.getElementById('response');
-let detectedText = document.getElementById('detected');
-let detectedSwitch = document.getElementById('switch');
-let copyLink = document.getElementById("copy");
-let errorMsg = document.getElementById("error");
-let successMsg = document.getElementById("success");
-let copiedMsg = document.getElementById("copied");
+elements.form.addEventListener('submit', handleSubmit);
+elements.input.addEventListener('input', handleInput);
+elements.clearButton.addEventListener('click', clearInput);
+elements.typeToggle.addEventListener('click', toggleInputType);
+elements.copyButton.addEventListener('click', copyResult);
 
-setDetected(TYPE_USERNAME);
+setInputType(detectInputType(elements.input.value));
+elements.input.focus();
 
-queryInput.addEventListener('keyup', function (e) {
-    let key = e.which || e.keyCode;
-    if (key === 13) {
-        runRoutineV2(queryInput.value, detected);
-    } else {
-        runDetection(queryInput.value, (response) => setDetected(response));
-    }
-});
+function handleInput() {
+    state.requestId += 1;
+    setLoading(false);
+    setInputType(detectInputType(elements.input.value));
+    elements.clearButton.hidden = elements.input.value.length === 0;
+    clearResult();
+    clearStatus();
+}
 
-detectedSwitch.addEventListener('click', function (e) {
-    if(detected === TYPE_USERNAME) {
-        setDetected(TYPE_USER_ID);
-    } else {
-        setDetected(TYPE_USERNAME);
-    }
-	// if they're switch the mode while the textbox has content, there's a good chance they want to re-run it in the new mode
-	if(queryInput.value.length > 0) {
-		runRoutineV2(queryInput.value, detected);
-	}
-});
+function clearInput() {
+    elements.input.value = '';
+    elements.input.dispatchEvent(new Event('input'));
+    elements.input.focus();
+}
 
-copyLink.addEventListener('click', function (e) { copyResults(); });
+function toggleInputType() {
+    state.requestId += 1;
+    setLoading(false);
+    setInputType(
+        state.inputType === INPUT_TYPE.USERNAME ? INPUT_TYPE.USER_ID : INPUT_TYPE.USERNAME
+    );
+    clearResult();
+    clearStatus();
+    elements.input.focus();
 
-function runDetection(input, callback) {
-    if(isNaN(input)) {
-        callback(TYPE_USERNAME);
-    } else {
-        callback(TYPE_USER_ID)
+    if (normalizeInput(elements.input.value)) {
+        window.setTimeout(() => elements.form.requestSubmit(), 0);
     }
 }
 
-function setDetected(newValue) {
-    detected = newValue;
-    detectedText.innerText = newValue;
+function setInputType(inputType) {
+    state.inputType = inputType;
+    const inputLabel = getInputTypeLabel(inputType);
+    const alternateLabel = getInputTypeLabel(
+        inputType === INPUT_TYPE.USERNAME ? INPUT_TYPE.USER_ID : INPUT_TYPE.USERNAME
+    );
+
+    elements.detectedType.textContent = inputLabel;
+    elements.typeToggle.setAttribute(
+        'aria-label',
+        `Detected as ${inputLabel}. Click to switch to ${alternateLabel}.`
+    );
 }
 
-function runRoutineV2(input, type) {
-    clearError();
+async function handleSubmit(event) {
+    event.preventDefault();
 
-    if(input.length <= 0) {
-        setError("Please provide an username or user id!");
+    const input = normalizeInput(elements.input.value);
+    const validationMessage = validateInput(input, state.inputType);
+
+    if (validationMessage) {
+        showStatus(validationMessage, 'error');
+        elements.input.focus();
         return;
     }
 
-    console.log("input: " + input);
-    if (type === TYPE_USERNAME) {
-        getUserIdV2(input, fetchUserIdV2, failedRequest);
-    } else if (type === TYPE_USER_ID) {
-        getUsernameV2(input, fetchUsernameV2, failedRequest);
+    elements.input.value = input;
+    elements.clearButton.hidden = false;
+    clearResult();
+    clearStatus();
+    setLoading(true);
+
+    const requestId = ++state.requestId;
+
+    try {
+        const result = await convertTwitchIdentifier(input);
+
+        if (requestId !== state.requestId) {
+            return;
+        }
+
+        showResult(result.output, result.output_type);
+    } catch (error) {
+        if (requestId !== state.requestId) {
+            return;
+        }
+
+        const message = error instanceof Error ? error.message : 'The lookup failed. Try again.';
+        showStatus(message, 'error');
+    } finally {
+        if (requestId === state.requestId) {
+            setLoading(false);
+        }
     }
 }
 
-function fetchUserIdV2(userid) {
-	queryOutput.innerText = userid;
-    setSuccess("User ID retrieved successfully.");
-	resultDiv.style.display = "";
+function setLoading(isLoading) {
+    elements.submitButton.disabled = isLoading;
+    elements.submitLabel.hidden = isLoading;
+    elements.submitSpinner.hidden = !isLoading;
+    elements.submitButton.setAttribute('aria-busy', String(isLoading));
+    elements.submitButton.setAttribute(
+        'aria-label',
+        isLoading ? 'Lookup in progress' : 'Translate'
+    );
 }
 
-function fetchUsernameV2(username) {
-    queryOutput.innerHTML = username;
-    setSuccess("Username retrieved successfully.");
-	resultDiv.style.display = "";
+function showResult(value, outputType) {
+    elements.resultLabel.textContent = getOutputTypeLabel(outputType);
+    elements.response.textContent = value;
+    elements.result.hidden = false;
 }
 
-function failedRequest() {
-    setError("The request you attempted failed! " + detected + " " + queryInput.value + " doesn't exist.");
-	resultDiv.style.display = "none";
-	clearSuccess();
+function clearResult() {
+    elements.result.hidden = true;
+    elements.response.textContent = '';
+    resetCopyButton();
 }
 
-function badRequest(type, resource) {
-    setError("The " + type + " '" + resource + "' was not valid!");
+async function copyResult() {
+    const value = elements.response.textContent;
+
+    if (!value) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(value);
+        window.clearTimeout(state.copyResetTimer);
+        elements.copyLabel.textContent = 'Copied';
+        elements.copyButton.classList.add('copied');
+        showStatus('Copied to clipboard.', 'success');
+        state.copyResetTimer = window.setTimeout(resetCopyButton, 1800);
+    } catch {
+        showStatus('Could not copy the result. Select it and copy manually.', 'error');
+    }
 }
 
-function setSuccess(successMsgCnts) {
-    successMsg.innerHTML = successMsgCnts;
-    setTimeout(clearSuccess, 10000);
-	clearError();
+function resetCopyButton() {
+    window.clearTimeout(state.copyResetTimer);
+    elements.copyLabel.textContent = 'Copy';
+    elements.copyButton.classList.remove('copied');
 }
 
-function setCopied(requestType) {
-	copiedMsg.innerHTML = "Copied " + requestType + "!";
-	setTimeout(clearCopied, 5000);
+function showStatus(message, type) {
+    elements.status.textContent = message;
+    elements.status.className = `status ${type}`;
+    elements.status.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    elements.status.hidden = false;
 }
 
-function clearCopied() {
-	copiedMsg.innerHTML = "";
-}
-
-function clearSuccess() {
-    successMsg.innerHTML = "";
-}
-
-function setError(errorMsgCnts) {
-    errorMsg.innerHTML = errorMsgCnts;
-    setTimeout(clearError, 10000);
-}
-
-function clearError() {
-    errorMsg.innerHTML = "";
-}
-
-function copyResults() {
-	results = queryOutput.innerHTML;
-	
-	if(detected == TYPE_USERNAME) {
-		setCopied("user id");
-	} else {
-		setCopied("username");
-	}
-	
-	document.oncopy = function(event) {
-		event.clipboardData.setData("text", results);
-		event.preventDefault();
-	};
-	document.execCommand("copy", false, null);
+function clearStatus() {
+    elements.status.textContent = '';
+    elements.status.className = 'status';
+    elements.status.setAttribute('role', 'status');
+    elements.status.hidden = true;
 }

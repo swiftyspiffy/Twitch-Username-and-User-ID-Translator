@@ -1,20 +1,21 @@
 {
-   "action": {
-      "default_icon": {
-         "150": "icon.png"
-      },
-      "default_popup": "form.html"
-   },
-   "description": "Fetch user id of a Twitch username or the username of a Twitch user id.",
-   "icons": {
-      "150": "icon.png"
-   },
-   "manifest_version": 3,
-   "name": "Twitch Username and User ID Translator",
-   "options_page": "form.html",
-   "permissions": [ "storage" ],
-   "host_permissions": [],
-   "short_name": "TwitchUsr2ID",
-   "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.9"
+    "action": {
+        "default_icon": {
+            "150": "icon.png"
+        },
+        "default_popup": "form.html",
+        "default_title": "Twitch Username ↔ User ID"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "description": "Translate Twitch usernames to user IDs and user IDs to usernames.",
+    "icons": {
+        "150": "icon.png"
+    },
+    "manifest_version": 3,
+    "minimum_chrome_version": "88",
+    "name": "Twitch Username and User ID Translator",
+    "short_name": "TwitchUsr2ID",
+    "version": "2.2.0"
 }
